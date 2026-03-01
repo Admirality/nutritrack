@@ -1,101 +1,91 @@
-import Image from "next/image";
+const meals = [
+  {
+    label: "Breakfast",
+    items: [{ name: "Oatmeal with berries", calories: 320, protein: 10 }],
+  },
+  {
+    label: "Lunch",
+    items: [{ name: "Grilled chicken salad", calories: 480, protein: 42 }],
+  },
+  {
+    label: "Dinner",
+    items: [],
+  },
+  {
+    label: "Snacks",
+    items: [],
+  },
+];
+
+const goal = 2000;
+const consumed = meals.flatMap((m) => m.items).reduce((sum, i) => sum + i.calories, 0);
+const remaining = goal - consumed;
 
 export default function Home() {
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+    <main className="flex flex-col flex-1 pb-6">
+      {/* Header */}
+      <header className="sticky top-0 bg-white border-b border-gray-200 px-4 py-3 z-10">
+        <h1 className="text-xl font-bold text-green-600">NutriTrack</h1>
+        <p className="text-xs text-gray-500">
+          {new Date().toLocaleDateString("en-US", {
+            weekday: "long",
+            month: "long",
+            day: "numeric",
+          })}
+        </p>
+      </header>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+      <div className="flex flex-col gap-4 px-4 pt-4">
+        {/* Calorie summary */}
+        <section className="bg-white rounded-2xl p-4 shadow-sm">
+          <h2 className="text-sm font-medium text-gray-500 mb-3">Calories</h2>
+          <div className="flex justify-between text-center mb-3">
+            <div>
+              <p className="text-2xl font-bold">{goal}</p>
+              <p className="text-xs text-gray-400">Goal</p>
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-green-600">{consumed}</p>
+              <p className="text-xs text-gray-400">Eaten</p>
+            </div>
+            <div>
+              <p className="text-2xl font-bold">{remaining}</p>
+              <p className="text-xs text-gray-400">Remaining</p>
+            </div>
+          </div>
+          <div className="w-full bg-gray-100 rounded-full h-2">
+            <div
+              className="bg-green-500 h-2 rounded-full"
+              style={{ width: `${Math.min((consumed / goal) * 100, 100)}%` }}
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+          </div>
+        </section>
+
+        {/* Meal sections */}
+        {meals.map((meal) => (
+          <section key={meal.label} className="bg-white rounded-2xl p-4 shadow-sm">
+            <div className="flex justify-between items-center mb-2">
+              <h2 className="font-semibold">{meal.label}</h2>
+              <button className="text-green-600 text-sm font-medium">+ Add</button>
+            </div>
+            {meal.items.length === 0 ? (
+              <p className="text-sm text-gray-400">No items logged</p>
+            ) : (
+              <ul className="divide-y divide-gray-100">
+                {meal.items.map((item) => (
+                  <li key={item.name} className="py-2 flex justify-between text-sm">
+                    <span>{item.name}</span>
+                    <span className="text-gray-500">
+                      {item.calories} cal · {item.protein}g protein
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        ))}
+      </div>
+    </main>
   );
 }
