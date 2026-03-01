@@ -30,6 +30,8 @@ export default function Home() {
   const [goals, setGoals] = useState<Goals>(DEFAULT_GOALS);
 
   const [modalMeal, setModalMeal] = useState<string | null>(null);
+  const [editingEntry, setEditingEntry] = useState<FoodLog | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const [foodName, setFoodName] = useState("");
   const [calories, setCalories] = useState("");
   const [protein, setProtein] = useState("");
@@ -61,6 +63,8 @@ export default function Home() {
   }
 
   function openModal(meal: string) {
+    setEditingEntry(null);
+    setConfirmDelete(false);
     setMealType(meal);
     setFoodName("");
     setCalories("");
@@ -70,8 +74,22 @@ export default function Home() {
     setModalMeal(meal);
   }
 
+  function openEditModal(entry: FoodLog) {
+    setEditingEntry(entry);
+    setConfirmDelete(false);
+    setMealType(entry.meal_type);
+    setFoodName(entry.food_name);
+    setCalories(String(entry.calories));
+    setProtein(entry.protein != null ? String(entry.protein) : "");
+    setCarbs(entry.carbs != null ? String(entry.carbs) : "");
+    setFat(entry.fat != null ? String(entry.fat) : "");
+    setModalMeal(entry.meal_type);
+  }
+
   function closeModal() {
     setModalMeal(null);
+    setEditingEntry(null);
+    setConfirmDelete(false);
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -79,15 +97,30 @@ export default function Home() {
     if (!foodName.trim() || !calories) return;
     setSaving(true);
 
-    await supabase.from("food_logs").insert({
+    const payload = {
       meal_type: mealType,
       food_name: foodName.trim(),
       calories: parseInt(calories, 10),
       protein: protein ? parseInt(protein, 10) : null,
       carbs: carbs ? parseInt(carbs, 10) : null,
       fat: fat ? parseInt(fat, 10) : null,
-    });
+    };
 
+    if (editingEntry) {
+      await supabase.from("food_logs").update(payload).eq("id", editingEntry.id);
+    } else {
+      await supabase.from("food_logs").insert(payload);
+    }
+
+    setSaving(false);
+    closeModal();
+    fetchLogs();
+  }
+
+  async function handleDelete() {
+    if (!editingEntry) return;
+    setSaving(true);
+    await supabase.from("food_logs").delete().eq("id", editingEntry.id);
     setSaving(false);
     closeModal();
     fetchLogs();
@@ -205,7 +238,11 @@ export default function Home() {
                   ) : (
                     <ul className="divide-y divide-gray-100">
                       {items.map((item) => (
-                        <li key={item.id} className="py-2 flex justify-between text-sm">
+                        <li
+                          key={item.id}
+                          className="py-2 flex justify-between text-sm cursor-pointer active:bg-gray-50 rounded-lg -mx-1 px-1"
+                          onClick={() => openEditModal(item)}
+                        >
                           <span>{item.food_name}</span>
                           <span className="text-gray-500 text-right">
                             {item.calories} cal
@@ -236,7 +273,9 @@ export default function Home() {
             className="bg-white w-full max-w-md mx-auto rounded-t-2xl p-6"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 className="text-lg font-semibold mb-4">Log food</h2>
+            <h2 className="text-lg font-semibold mb-4">
+              {editingEntry ? "Edit food" : "Log food"}
+            </h2>
             <form onSubmit={handleSubmit} className="flex flex-col gap-3">
               <div>
                 <label className="text-sm text-gray-500 mb-1 block">Meal</label>
@@ -297,6 +336,36 @@ export default function Home() {
                   ))}
                 </div>
               </div>
+
+              {editingEntry && !confirmDelete && (
+                <button
+                  type="button"
+                  onClick={() => setConfirmDelete(true)}
+                  className="w-full border border-red-200 text-red-600 rounded-xl py-2 text-sm font-medium mt-1"
+                >
+                  Delete
+                </button>
+              )}
+
+              {editingEntry && confirmDelete && (
+                <div className="flex gap-2 mt-1">
+                  <button
+                    type="button"
+                    onClick={() => setConfirmDelete(false)}
+                    className="flex-1 border border-gray-200 rounded-xl py-2 text-sm font-medium"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleDelete}
+                    disabled={saving}
+                    className="flex-1 bg-red-600 text-white rounded-xl py-2 text-sm font-medium disabled:opacity-50"
+                  >
+                    {saving ? "Deleting…" : "Confirm Delete"}
+                  </button>
+                </div>
+              )}
 
               <div className="flex gap-2 pt-1">
                 <button
