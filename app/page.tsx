@@ -107,9 +107,16 @@ export default function Home() {
     };
 
     if (editingEntry) {
-      await supabase.from("food_logs").update(payload).eq("id", editingEntry.id);
+      const { error } = await supabase
+        .from("food_logs")
+        .update(payload)
+        .eq("id", editingEntry.id);
+      if (error) console.error("Update failed:", error);
     } else {
-      await supabase.from("food_logs").insert(payload);
+      const { error } = await supabase
+        .from("food_logs")
+        .insert({ ...payload, created_at: new Date().toISOString() });
+      if (error) console.error("Insert failed:", error);
     }
 
     setSaving(false);
